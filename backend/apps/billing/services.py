@@ -42,7 +42,6 @@ class BillingService:
                 continue
             
             product = product_map[pid]
-            import pdb; pdb.set_trace() 
             if product.available_stocks < qty:
                 errors.append(
                     f"Insufficient stock for '{pid}'. "
@@ -56,7 +55,6 @@ class BillingService:
 
     @staticmethod
     def calculate_bill(validated_items: List[Dict]) -> Dict:
-        import pdb;pdb.set_trace()
         """
         Calculate bill.
         """
