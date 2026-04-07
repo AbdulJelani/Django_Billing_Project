@@ -2,6 +2,7 @@ from decimal import Decimal, ROUND_HALF_UP
 from typing import List, Dict, Tuple
 from django.db import transaction
 from apps.products.models import Product
+from apps.customers.models import Customer
 from .models import Purchase, PurchaseItem
 
 
@@ -27,18 +28,21 @@ class BillingService:
         ).only('id', 'product_id', 'name', 'price', 'tax_percentage', 'available_stocks')
         
         product_map = {p.product_id: p for p in products}
+       
         errors = []
         validated = []
 
         for item in items:
             pid = item['product_id']
             qty = item['quantity']
+           
             
             if pid not in product_map:
                 errors.append(f"Product '{pid}' not found or inactive.")
                 continue
             
             product = product_map[pid]
+            import pdb; pdb.set_trace() 
             if product.available_stocks < qty:
                 errors.append(
                     f"Insufficient stock for '{pid}'. "
@@ -52,6 +56,7 @@ class BillingService:
 
     @staticmethod
     def calculate_bill(validated_items: List[Dict]) -> Dict:
+        import pdb;pdb.set_trace()
         """
         Calculate bill.
         """
@@ -129,6 +134,16 @@ class BillingService:
         balance = cash_paid - bill['rounded_net_price']
         denoms_given = validated_data.get('denominations', {})
         balance_denom = cls.calculate_balance_denomination(balance, denoms_given)
+
+        # Ensure a Customer record exists
+        email = validated_data['customer_email']
+        Customer.objects.get_or_create(
+            email__iexact=email,
+            defaults={
+                'name': email.split('@')[0],
+                'email': email,
+            }
+        )
 
         # Create purchase
         purchase = Purchase.objects.create(

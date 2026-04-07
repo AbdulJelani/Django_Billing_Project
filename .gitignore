@@ -57,6 +57,10 @@ db.sqlite3-journal
 media/
 staticfiles/
 
+# Celery
+celerybeat-schedule*
+celerybeat.pid
+
 # IDEs
 .vscode/
 .idea/
